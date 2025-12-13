@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ゲーム</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+      background-color: #ffffff;
+      color: #111;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+
+    header {
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .games {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .game-card {
+      border: 1px solid #e5e5e5;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 20px;
+    }
+
+    .game-card img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      background-color: #ddd;
+    }
+
+    .game-info h2 {
+      font-size: 1.2rem;
+      margin: 0 0 8px;
+    }
+
+    .game-info p {
+      font-size: 0.9rem;
+      color: #555;
+      line-height: 1.7;
+      margin: 0 0 12px;
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .links a {
+      border: 1px solid #ddd;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 4px;
+    }
+
+    footer {
+      margin-top: 80px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    @media (max-width: 640px) {
+      .game-card {
+        grid-template-columns: 1fr;
+      }
+
+      .game-card img {
+        max-width: 240px;
+        margin: 0 auto;
+      }
+
+      .game-info {
+        text-align: center;
+      }
+
+      .links {
+        justify-content: center;
+      }
+    }
+
+    @media (min-width: 900px) {
+      body {
+        background-color: #f5f5f5;
+      }
+
+      .container {
+        background-color: #ffffff;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <header>
+      <h1>ゲーム</h1>
+      <p>個人制作ゲームの紹介ページです。プレイは外部サイトから行えます。</p>
+    </header>
+
+    <main class="games">
+
+      <!-- ゲームカードここから -->
+      <section class="game-card">
+        <img src="covers/game-a.jpg" alt="ゲームA" />
+        <div class="game-info">
+          <h2>ゲームタイトルA</h2>
+          <p>
+            ゲームの概要を2〜3行で書きます。ジャンル、雰囲気、どんな体験ができるかを簡潔に。
+          </p>
+          <div class="links">
+            <a href="#">itch.io</a>
+            <a href="#">BOOTH</a>
+            <a href="#">Steam</a>
+          </div>
+        </div>
+      </section>
+      <!-- ゲームカードここまで -->
+
+      <section class="game-card">
+        <img src="covers/game-b.jpg" alt="ゲームB" />
+        <div class="game-info">
+          <h2>ゲームタイトルB</h2>
+          <p>
+            短編ゲームやプロトタイプはこちら。操作方法やプレイ時間の目安を書いても親切です。
+          </p>
+          <div class="links">
+            <a href="#">itch.io</a>
+            <a href="#">GitHub</a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <p><a href="../index.html">トップへ戻る</a></p>
+      <p>© 作者名</p>
+    </footer>
+
+  </div>
+</body>
+</html>
