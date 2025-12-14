@@ -1,4 +1,24 @@
-<!-- ========================= -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Illustration Title</title>
+<style>
+body {
+margin: 0;
+font-family: system-ui, sans-serif;
+background: #fafafa;
+color: #222;
+}
+.container {
+max-width: 720px;
+margin: 0 auto;
+padding: 16px;
+}
+img {
+width: 100%;
+border-radius: 8px;
+}
 h1 {
 font-size: 1.2rem;
 margin: 16px 0 8px;
@@ -25,6 +45,28 @@ text-decoration: none;
 color: #0066cc;
 font-size: 0.9rem;
 }
+/* フルスクリーン用 */
+.fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: zoom-out;
+}
+
+.fullscreen-overlay img {
+  max-width: 95%;
+  max-height: 95%;
+}
+
+/* 画像ホバー時 */
+.item img {
+  cursor: zoom-in;
+}
+
 </style>
 </head>
 <body>
@@ -43,6 +85,9 @@ font-size: 0.9rem;
 <a href="../manga/work1/index.html">📘 この世界観の漫画を見る</a>
 <a href="../games/game1.html">🎮 この世界観のゲームを見る</a>
 </div>
+</div>
+<div class="fullscreen-overlay" id="fullscreen">
+  <img src="" alt="">
 </div>
 </body>
 </html>
