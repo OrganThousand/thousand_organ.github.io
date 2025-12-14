@@ -10,6 +10,7 @@ window.ILLUSTS = [
     image: "images/2loras_test__00037_.png",
     tags: ["fantasy", "myth", "original"],
     worldLabel: "神話世界",
+    worldId:"mythland",
     links: {
       manga: "../comic/work1/index.html",
       game: "../game/game1.html"
@@ -24,6 +25,7 @@ window.ILLUSTS = [
     image: "images/illust_02.jpg",
     tags: ["fantasy", "original"],
     worldLabel: "自然×機械",
+    worldId:"mechforest",
     links: {
       manga: "../comic/work1/index.html",
       game: "../game/game1.html"
@@ -38,6 +40,7 @@ window.ILLUSTS = [
     image: "images/illust_03.jpg",
     tags: ["myth", "original"],
     worldLabel: "神話世界",
+    worldId:"mythland",
     links: {
       manga: "../comic/work2/index.html"
     }

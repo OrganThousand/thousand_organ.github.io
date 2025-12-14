@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>World | Thousand Organ</title>
+  <style>
+    body { margin:0; font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif; background:#fafafa; color:#111; }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; background:#fff; }
+
+    header { display:flex; justify-content: space-between; align-items: baseline; gap: 16px; border-bottom:1px solid #eee; padding-bottom: 14px; }
+    header h1 { margin:0; font-size: 1.4rem; letter-spacing: 0.04em; }
+    header .nav a { text-decoration: underline; color:#444; margin-left: 10px; }
+
+    .hero { margin-top: 16px; border:1px solid #e5e5e5; }
+    .hero img { width:100%; display:block; aspect-ratio: 16/9; object-fit: cover; background:#ddd; }
+    .desc { margin: 14px 0 0; color:#555; line-height: 1.8; }
+
+    h2 { margin: 26px 0 12px; font-size: 1.05rem; color:#333; }
+
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .card { border: 1px solid #e5e5e5; background:#fff; overflow:hidden; transition: background-color .2s ease; }
+    .card:hover { background:#fafafa; }
+    .card img { width:100%; display:block; aspect-ratio: 16/9; object-fit: cover; background:#ddd; }
+    .info { padding: 12px; }
+    .meta { font-size: .8rem; color:#666; margin-bottom: 6px; }
+    .title { font-size: .95rem; line-height: 1.4; }
+    .empty { color:#666; padding: 10px 0; }
+
+    footer { margin-top: 50px; font-size: .85rem; color:#666; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 id="worldName">World</h1>
+      <div class="nav">
+        <a href="index.html">世界観一覧</a>
+        <a href="../index.html">トップ</a>
+      </div>
+    </header>
+
+    <div class="hero" id="heroWrap" style="display:none;">
+      <img id="heroImg" src="" alt="">
+    </div>
+    <p class="desc" id="worldDesc"></p>
+
+    <h2>Illustrations</h2>
+    <div class="grid" id="illustGrid"></div>
+    <div class="empty" id="illustEmpty" style="display:none;">この世界観のイラストはまだありません。</div>
+
+    <h2>Updates</h2>
+    <div class="grid" id="updateGrid"></div>
+    <div class="empty" id="updateEmpty" style="display:none;">この世界観の更新はまだありません。</div>
+
+    <footer>© 2025 Organ All rights reserved</footer>
+  </div>
+
+  <script src="../data/worlds.js"></script>
+  <script src="../data/illust.js"></script>
+  <script src="../data/updates.js"></script>
+  <script>
+    const worlds = window.WORLDS || [];
+    const illusts = window.ILLUSTS || [];
+    const updates = window.UPDATES || [];
+
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+
+    const world = worlds.find(w => w.id === id) || worlds[0];
+
+    const worldName = document.getElementById('worldName');
+    const worldDesc = document.getElementById('worldDesc');
+    const heroWrap = document.getElementById('heroWrap');
+    const heroImg = document.getElementById('heroImg');
+
+    const illustGrid = document.getElementById('illustGrid');
+    const illustEmpty = document.getElementById('illustEmpty');
+
+    const updateGrid = document.getElementById('updateGrid');
+    const updateEmpty = document.getElementById('updateEmpty');
+
+    if (!world) {
+      worldName.textContent = 'World not found';
+      worldDesc.textContent = '';
+    } else {
+      document.title = `${world.name} | Worlds`;
+      worldName.textContent = world.name;
+      worldDesc.textContent = world.description || '';
+
+      if (world.hero) {
+        heroWrap.style.display = 'block';
+        heroImg.src = world.hero;
+        heroImg.alt = world.name;
+      }
+    }
+
+    // --- Illustrations ---
+    const iList = illusts
+      .filter(x => x.worldId === world.id)
+      .slice()
+      .sort((a,b) => String(b.date || '').localeCompare(String(a.date || '')));
+
+    illustGrid.innerHTML = '';
+    if (iList.length === 0) {
+      illustEmpty.style.display = 'block';
+    } else {
+      iList.forEach(item => {
+        const a = document.createElement('a');
+        a.className = 'card';
+        a.href = `../illust/view.html?id=${encodeURIComponent(item.id)}`;
+
+        const img = document.createElement('img');
+        img.src = `../illust/${item.image}`; // illust基準の image をここから参照
+        img.alt = item.title || 'illustration';
+        img.loading = 'lazy';
+
+        const info = document.createElement('div');
+        info.className = 'info';
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = item.year || '';
+
+        const title = document.createElement('div');
+        title.className = 'title';
+        title.textContent = item.title || '';
+
+        info.appendChild(meta);
+        info.appendChild(title);
+
+        a.appendChild(img);
+        a.appendChild(info);
+
+        illustGrid.appendChild(a);
+      });
+    }
+
+    // --- Updates ---
+    const uList = updates
+      .filter(x => x.worldId === world.id)
+      .slice()
+      .sort((a,b) => String(b.date || '').localeCompare(String(a.date || '')));
+
+    function typeLabel(t) {
+      return t === 'illust' ? '🖼 Illustration' :
+             t === 'comic'  ? '📖 Comic' :
+             t === 'game'   ? '🎮 Game' : 'Update';
+    }
+
+    updateGrid.innerHTML = '';
+    if (uList.length === 0) {
+      updateEmpty.style.display = 'block';
+    } else {
+      uList.forEach(item => {
+        const a = document.createElement('a');
+        a.className = 'card';
+        a.href = `../${item.link}`;
+
+        const img = document.createElement('img');
+        img.src = `../${item.image}`;
+        img.alt = item.title || 'update';
+        img.loading = 'lazy';
+
+        const info = document.createElement('div');
+        info.className = 'info';
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = `${typeLabel(item.type)} / ${item.date || ''}`;
+
+        const title = document.createElement('div');
+        title.className = 'title';
+        title.textContent = item.title || '';
+
+        info.appendChild(meta);
+        info.appendChild(title);
+
+        a.appendChild(img);
+        a.appendChild(info);
+
+        updateGrid.appendChild(a);
+      });
+    }
+  </script>
+</body>
+</html>
