@@ -1,4 +1,5 @@
 // data/illust.js
+//イラストページにデータを追加するときはここを編集する
 window.ILLUSTS = [
   {
     id: "illust_001",

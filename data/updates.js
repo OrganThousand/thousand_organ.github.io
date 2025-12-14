@@ -1,4 +1,5 @@
 // data/updates.js
+//更新通知の中身のデータ。ここを追記する
 window.UPDATES = [
     {
       type: "illust",

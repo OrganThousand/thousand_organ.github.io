@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Updates | Thousand Organ</title>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif; background:#fafafa; color:#111; }
+    a { color: inherit; text-decoration: none; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; background:#fff; }
+    header { display:flex; align-items: baseline; justify-content: space-between; gap: 16px; border-bottom:1px solid #eee; padding-bottom: 14px; }
+    header h1 { margin: 0; font-size: 1.4rem; letter-spacing: 0.04em; }
+    header .back a { text-decoration: underline; color:#444; font-size:0.95rem; }
+
+    .controls { display:flex; flex-wrap: wrap; gap: 10px; padding: 14px 0 8px; align-items: center; }
+    .chips { display:flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      padding: 6px 12px; border-radius: 999px; background:#eee; cursor:pointer;
+      font-size: 0.85rem; user-select:none;
+    }
+    .chip.active { background:#111; color:#fff; }
+    .search {
+      margin-left: auto;
+      display:flex; gap: 8px; align-items: center;
+    }
+    .search input {
+      width: min(340px, 70vw);
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      background: #fff;
+    }
+
+    .group { margin-top: 22px; }
+    .group h2 {
+      margin: 0 0 12px;
+      font-size: 1.05rem;
+      color:#333;
+      letter-spacing: 0.03em;
+    }
+
+    .list { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+    .card {
+      border: 1px solid #e5e5e5;
+      background:#fff;
+      transition: background-color 0.2s ease;
+    }
+    .card:hover { background:#fafafa; }
+
+    .card img {
+      width: 100%;
+      display:block;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      background:#ddd;
+    }
+    .info { padding: 12px; }
+    .meta { display:flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .type { font-size: 0.8rem; color:#666; }
+    .date { font-size: 0.85rem; color:#777; white-space: nowrap; }
+    .title { margin-top: 8px; font-size: 0.98rem; line-height: 1.5; }
+
+    .empty { padding: 28px 0; color:#666; }
+    footer { margin-top: 50px; font-size: 0.85rem; color:#666; text-align:center; }
+    footer a { text-decoration: underline; }
+
+    @media (min-width: 900px) {
+      body { background:#f5f5f5; }
+      .container { border-left: 1px solid #eee; border-right: 1px solid #eee; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Updates</h1>
+      <div class="back"><a href="../index.html">トップへ戻る</a></div>
+    </header>
+
+    <div class="controls">
+      <div class="chips" id="chips">
+        <div class="chip active" data-type="all">すべて</div>
+        <div class="chip" data-type="illust">🖼 イラスト</div>
+        <div class="chip" data-type="comic">📖 漫画</div>
+        <div class="chip" data-type="game">🎮 ゲーム</div>
+      </div>
+
+      <div class="search">
+        <input id="q" type="search" placeholder="タイトル検索（例：第3話 / 体験版 / 旅人）" />
+      </div>
+    </div>
+
+    <div id="root"></div>
+
+    <footer>
+      <p>© 2025 Organ All rights reserved</p>
+    </footer>
+  </div>
+
+  <!-- 更新ログ -->
+  <script src="../data/updates.js"></script>
+
+  <script>
+    const root = document.getElementById('root');
+    const chips = document.querySelectorAll('.chip');
+    const qInput = document.getElementById('q');
+
+    const updatesAll = (window.UPDATES || []).slice();
+
+    // URLパラメータ対応: ?type=illust&q=xxx
+    const params = new URLSearchParams(location.search);
+    let selectedType = params.get('type') || 'all';
+    let query = params.get('q') || '';
+
+    qInput.value = query;
+
+    function typeLabel(t) {
+      return t === 'illust' ? '🖼 Illustration'
+        : t === 'comic' ? '📖 Comic'
+        : t === 'game'  ? '🎮 Game'
+        : 'Update';
+    }
+
+    function groupKey(dateStr) {
+      // "YYYY-MM-DD" -> "YYYY-MM"
+      if (!dateStr) return '0000-00';
+      return String(dateStr).slice(0, 7);
+    }
+
+    function updateURL() {
+      const p = new URLSearchParams();
+      if (selectedType !== 'all') p.set('type', selectedType);
+      if (query.trim()) p.set('q', query.trim());
+      const qs = p.toString();
+      history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+    }
+
+    function setChipActive() {
+      chips.forEach(c => c.classList.toggle('active', c.dataset.type === selectedType));
+    }
+
+    function filterAndSort() {
+      let list = updatesAll.slice();
+
+      // sort: newest first
+      list.sort((a,b) => String(b.date || '').localeCompare(String(a.date || '')));
+
+      if (selectedType !== 'all') {
+        list = list.filter(u => u.type === selectedType);
+      }
+
+      const q = query.trim().toLowerCase();
+      if (q) {
+        list = list.filter(u => String(u.title || '').toLowerCase().includes(q));
+      }
+
+      return list;
+    }
+
+    function render() {
+      const list = filterAndSort();
+      setChipActive();
+
+      if (list.length === 0) {
+        root.innerHTML = `<div class="empty">該当する更新がありません。</div>`;
+        return;
+      }
+
+      // group by YYYY-MM
+      const groups = new Map();
+      for (const item of list) {
+        const key = groupKey(item.date);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(item);
+      }
+
+      // render
+      root.innerHTML = '';
+      for (const [key, items] of groups) {
+        const section = document.createElement('section');
+        section.className = 'group';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = key === '0000-00' ? '日付未設定' : key;
+        section.appendChild(h2);
+
+        const grid = document.createElement('div');
+        grid.className = 'list';
+
+        items.forEach(item => {
+          const a = document.createElement('a');
+          a.className = 'card';
+          a.href = item.link;
+
+          const img = document.createElement('img');
+          img.src = item.image;
+          img.alt = item.title || 'update';
+          img.loading = 'lazy';
+
+          const info = document.createElement('div');
+          info.className = 'info';
+
+          const meta = document.createElement('div');
+          meta.className = 'meta';
+
+          const type = document.createElement('div');
+          type.className = 'type';
+          type.textContent = typeLabel(item.type);
+
+          const date = document.createElement('div');
+          date.className = 'date';
+          date.textContent = item.date || '';
+
+          meta.appendChild(type);
+          meta.appendChild(date);
+
+          const title = document.createElement('div');
+          title.className = 'title';
+          title.textContent = item.title || '';
+
+          info.appendChild(meta);
+          info.appendChild(title);
+
+          a.appendChild(img);
+          a.appendChild(info);
+
+          grid.appendChild(a);
+        });
+
+        section.appendChild(grid);
+        root.appendChild(section);
+      }
+
+      updateURL();
+    }
+
+    // events
+    chips.forEach(c => c.addEventListener('click', () => {
+      selectedType = c.dataset.type;
+      render();
+    }));
+
+    qInput.addEventListener('input', () => {
+      query = qInput.value;
+      render();
+    });
+
+    // init from URL
+    // chip active and input already set
+    render();
+  </script>
+</body>
+</html>
