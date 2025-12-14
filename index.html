@@ -149,14 +149,16 @@
       font-size: 1.2rem;
       margin-bottom: 16px;
       letter-spacing: 0.04em;
+      text-align: center;
     }
 
     .updates-scroll {
       display: flex;
       gap: 16px;
       overflow-x: auto;
-      padding-bottom: 8px;
+      padding: 8px 2px 12px;
       scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
     }
 
     .updates-scroll::-webkit-scrollbar {
@@ -175,37 +177,69 @@
       background: #fff;
       scroll-snap-align: start;
       flex-shrink: 0;
+      transition: background-color 0.2s ease;
+    }
+
+    .update-card:hover {
+      background-color: #fafafa;
     }
 
     .update-card img {
       width: 100%;
       display: block;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: #ddd;
     }
 
     .update-card .info {
-      padding: 10px;
-      font-size: 0.85rem;
+      padding: 12px;
+      text-align: left;
     }
 
     .update-card .type {
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       color: #666;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .update-card .title {
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       line-height: 1.4;
+      color: #111;
+    }
+
+    .update-card .date {
+      font-size: 0.78rem;
+      color: #777;
+      margin-top: 8px;
     }
 
     .updates-more {
-      margin-top: 10px;
+      margin-top: 12px;
       text-align: right;
       font-size: 0.9rem;
     }
 
     .updates-more a {
       text-decoration: underline;
+    }
+
+    /* moreカード */
+    .update-card.update-more {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .update-card.update-more .more-box {
+      width: 100%;
+      height: 100%;
+      padding: 28px 12px;
+      text-align: center;
+      font-size: 0.95rem;
+      color: #111;
+      letter-spacing: 0.04em;
     }
   </style>
 </head>
@@ -271,9 +305,11 @@
 
   </div>
 
-  <script src="illust/data.js"></script>
+  <script src="data/illust.js"></script>
+  <script src="data/updates.js"></script>
 
   <script>
+    // ===== 最新イラスト3枚 =====
     (function renderLatestIllusts() {
       const grid = document.getElementById('latestIllustGrid');
       if (!grid) return;
@@ -281,12 +317,10 @@
       const illusts = (window.ILLUSTS || []).slice();
       if (illusts.length === 0) return;
 
-      // 新着判定：date があれば date、なければ配列末尾が新しい想定
+      // dateがあればdate、なければ配列末尾が新しい想定
       const hasDate = illusts.some(i => i.date);
       if (hasDate) {
-        illusts.sort((a, b) =>
-          String(b.date || '').localeCompare(String(a.date || ''))
-        );
+        illusts.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
       } else {
         illusts.reverse();
       }
@@ -299,7 +333,7 @@
         a.href = `illust/view.html?id=${encodeURIComponent(item.id)}`;
 
         const img = document.createElement('img');
-        img.src = `illust/${item.image}`;
+        img.src = `illust/${item.image}`;   // item.image は "images/..." 前提
         img.alt = item.title || 'illustration';
         img.loading = 'lazy';
 
@@ -307,56 +341,71 @@
         grid.appendChild(a);
       });
     })();
-  </script>
-  
-  <script>
-    (function renderUpdates(){
+
+    // ===== 最新更新（最大10件）横スクロール =====
+    (function renderLatestUpdates() {
       const container = document.getElementById('updatesScroll');
       if (!container) return;
-  
+
       const updates = (window.UPDATES || []).slice();
       if (updates.length === 0) return;
-  
-      // 日付でソート（新しい順）
-      updates.sort((a,b) =>
-        String(b.date || '').localeCompare(String(a.date || ''))
-      );
-  
-      // 最大10件
+
+      updates.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+
+      container.innerHTML = '';
       updates.slice(0, 10).forEach(item => {
         const a = document.createElement('a');
         a.href = item.link;
         a.className = 'update-card';
-  
+
         const img = document.createElement('img');
-        img.src = item.image;
-        img.alt = item.title;
+        img.src = item.image; // updates.jsはサイト直下基準パスで統一
+        img.alt = item.title || 'update';
         img.loading = 'lazy';
-  
+
         const info = document.createElement('div');
         info.className = 'info';
-  
+
         const type = document.createElement('div');
         type.className = 'type';
         type.textContent =
-          item.type === 'illust' ? '🖼 Illustration'
-          : item.type === 'comic' ? '📖 Comic'
-          : '🎮 Game';
-  
+          item.type === 'illust' ? '🖼 Illustration' :
+            item.type === 'comic' ? '📖 Comic' :
+              item.type === 'game' ? '🎮 Game' : 'Update';
+
         const title = document.createElement('div');
         title.className = 'title';
-        title.textContent = item.title;
-  
+        title.textContent = item.title || '';
+
+        const date = document.createElement('div');
+        date.className = 'date';
+        date.textContent = item.date || '';
+
         info.appendChild(type);
         info.appendChild(title);
-  
+        info.appendChild(date);
+
         a.appendChild(img);
         a.appendChild(info);
+
         container.appendChild(a);
       });
+
+      // 最後に「more →」カードを追加
+      const more = document.createElement('a');
+      more.href = 'updates/index.html';
+      more.className = 'update-card update-more';
+
+      const moreBox = document.createElement('div');
+      moreBox.className = 'more-box';
+      moreBox.textContent = 'more →';
+
+      more.appendChild(moreBox);
+      container.appendChild(more);
+
     })();
   </script>
-  
+
 </body>
 
 </html>
