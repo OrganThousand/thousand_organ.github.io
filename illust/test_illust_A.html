@@ -1,93 +1,125 @@
 <html lang="ja">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Illustration Title</title>
-<style>
-body {
-margin: 0;
-font-family: system-ui, sans-serif;
-background: #fafafa;
-color: #222;
-}
-.container {
-max-width: 720px;
-margin: 0 auto;
-padding: 16px;
-}
-img {
-width: 100%;
-border-radius: 8px;
-}
-h1 {
-font-size: 1.2rem;
-margin: 16px 0 8px;
-}
-.tags a {
-display: inline-block;
-margin: 4px 6px 0 0;
-padding: 4px 10px;
-font-size: 0.75rem;
-background: #eee;
-border-radius: 999px;
-text-decoration: none;
-color: #333;
-}
-.links {
-margin-top: 24px;
-padding-top: 16px;
-border-top: 1px solid #ddd;
-}
-.links a {
-display: block;
-margin-bottom: 8px;
-text-decoration: none;
-color: #0066cc;
-font-size: 0.9rem;
-}
-/* フルスクリーン用 */
-.fullscreen-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  cursor: zoom-out;
-}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Illustration Title</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #fafafa;
+      color: #222;
+    }
 
-.fullscreen-overlay img {
-  max-width: 95%;
-  max-height: 95%;
-}
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px;
+    }
 
-/* 画像ホバー時 */
-.item img {
-  cursor: zoom-in;
-}
+    img {
+      width: 100%;
+      border-radius: 8px;
+    }
 
-</style>
+    h1 {
+      font-size: 1.2rem;
+      margin: 16px 0 8px;
+    }
+
+    .tags a {
+      display: inline-block;
+      margin: 4px 6px 0 0;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      background: #eee;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #333;
+    }
+
+    .links {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #ddd;
+    }
+
+    .links a {
+      display: block;
+      margin-bottom: 8px;
+      text-decoration: none;
+      color: #0066cc;
+      font-size: 0.9rem;
+    }
+
+    /* フルスクリーン用 */
+    .fullscreen-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      cursor: zoom-out;
+    }
+
+    .fullscreen-overlay img {
+      max-width: 95%;
+      max-height: 95%;
+    }
+
+    /* 画像ホバー時 */
+    .container img {
+      cursor: zoom-in;
+    }
+  </style>
 </head>
+
 <body>
-<div class="container">
-<img src="images/2loras_test__00037_.png" alt="illustration" />
-<h1>神話世界の旅人</h1>
+  <div class="container">
+    <img src="images/2loras_test__00037_.png" alt="illustration" />
+    <h1>神話世界の旅人</h1>
 
+    <div class="tags">
+      <a href="../illust/index.html?tag=myth">#神話</a>
+      <a href="../illust/index.html?tag=fantasy">#ファンタジー</a>
+    </div>
 
-<div class="tags">
-<a href="illustrations.html?tag=myth">#神話</a>
-<a href="illustrations.html?tag=fantasy">#ファンタジー</a>
-</div>
+    <div class="links">
+      <a href="../manga/work1/index.html">📘 この世界観の漫画を見る</a>
+      <a href="../games/game1.html">🎮 この世界観のゲームを見る</a>
+    </div>
+  </div>
+  <div class="fullscreen-overlay" id="fullscreen">
+    <img src="" alt="">
+  </div>
 
+  <script>
+    // フルスクリーン表示（個別ページ用）
+    const overlay = document.getElementById('fullscreen');
+    const overlayImg = overlay.querySelector('img');
+    const mainImg = document.querySelector('.container > img');
 
-<div class="links">
-<a href="../manga/work1/index.html">📘 この世界観の漫画を見る</a>
-<a href="../games/game1.html">🎮 この世界観のゲームを見る</a>
-</div>
-</div>
-<div class="fullscreen-overlay" id="fullscreen">
-  <img src="" alt="">
-</div>
+    mainImg.addEventListener('click', () => {
+      overlayImg.src = mainImg.src;
+      overlay.style.display = 'flex';
+    });
+
+    overlay.addEventListener('click', () => {
+      overlay.style.display = 'none';
+      overlayImg.src = '';
+    });
+    // ESCキーで閉じる
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.style.display === 'flex') {
+        overlay.style.display = 'none';
+        overlayImg.src = '';
+      }
+    });
+  </script>
+
 </body>
+
 </html>
