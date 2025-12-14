@@ -13,10 +13,7 @@
       color: #111;
     }
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
+    a { color: inherit; text-decoration: none; }
 
     .container {
       max-width: 960px;
@@ -24,19 +21,28 @@
       padding: 32px 20px 64px;
     }
 
-    header {
-      margin-bottom: 40px;
-    }
+    header { margin-bottom: 28px; }
+    header h1 { font-size: 1.6rem; margin-bottom: 8px; }
+    header p { font-size: 0.9rem; color: #555; }
 
-    header h1 {
-      font-size: 1.6rem;
-      margin-bottom: 8px;
+    /* controls */
+    .controls {
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin: 12px 0 22px;
     }
-
-    header p {
-      font-size: 0.9rem;
-      color: #555;
+    .chips { display:flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background:#eee;
+      cursor:pointer;
+      user-select:none;
+      font-size: 0.85rem;
     }
+    .chip.active { background:#111; color:#fff; }
 
     .games {
       display: flex;
@@ -50,7 +56,10 @@
       display: grid;
       grid-template-columns: 160px 1fr;
       gap: 20px;
+      background: #fff;
+      transition: background-color 0.2s ease;
     }
+    .game-card:hover { background-color: #fafafa; }
 
     .game-card img {
       width: 100%;
@@ -59,17 +68,34 @@
       background-color: #ddd;
     }
 
-    .game-info h2 {
-      font-size: 1.2rem;
-      margin: 0 0 8px;
-    }
-
+    .game-info h2 { font-size: 1.2rem; margin: 0 0 8px; }
     .game-info p {
       font-size: 0.9rem;
       color: #555;
       line-height: 1.7;
       margin: 0 0 12px;
     }
+
+    .meta {
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 8px 0 12px;
+      color:#777;
+      font-size: 0.85rem;
+    }
+
+    .badge {
+      display:inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background:#eee;
+      color:#444;
+      font-size: 0.8rem;
+      text-decoration: none;
+    }
+    .badge:hover { background:#e6e6e6; }
 
     .links {
       display: flex;
@@ -84,6 +110,8 @@
       border-radius: 4px;
     }
 
+    .empty { color:#666; padding: 14px 0; }
+
     footer {
       margin-top: 80px;
       text-align: center;
@@ -92,32 +120,16 @@
     }
 
     @media (max-width: 640px) {
-      .game-card {
-        grid-template-columns: 1fr;
-      }
-
-      .game-card img {
-        max-width: 240px;
-        margin: 0 auto;
-      }
-
-      .game-info {
-        text-align: center;
-      }
-
-      .links {
-        justify-content: center;
-      }
+      .game-card { grid-template-columns: 1fr; }
+      .game-card img { max-width: 240px; margin: 0 auto; }
+      .game-info { text-align: center; }
+      .links { justify-content: center; }
+      .meta { justify-content: center; }
     }
 
     @media (min-width: 900px) {
-      body {
-        background-color: #f5f5f5;
-      }
-
-      .container {
-        background-color: #ffffff;
-      }
+      body { background-color: #f5f5f5; }
+      .container { background-color: #ffffff; }
     }
   </style>
 </head>
@@ -130,46 +142,111 @@
       <p>個人制作ゲームの紹介ページです。プレイは外部サイトから行えます。</p>
     </header>
 
-    <main class="games">
+    <div class="controls">
+      <div class="chips" id="chips">
+        <div class="chip active" data-world="all">すべて</div>
+        <div class="chip" data-world="mythland">神話世界</div>
+        <div class="chip" data-world="mechforest">森と機械</div>
+      </div>
+    </div>
 
-      <!-- ゲームカードここから -->
-      <section class="game-card">
-        <img src="covers/game-a.jpg" alt="ゲームA" />
-        <div class="game-info">
-          <h2>ゲームタイトルA</h2>
-          <p>
-            ゲームの概要を2〜3行で書きます。ジャンル、雰囲気、どんな体験ができるかを簡潔に。
-          </p>
-          <div class="links">
-            <a href="#">itch.io</a>
-            <a href="#">BOOTH</a>
-            <a href="#">Steam</a>
-          </div>
-        </div>
-      </section>
-      <!-- ゲームカードここまで -->
-
-      <section class="game-card">
-        <img src="covers/game-b.jpg" alt="ゲームB" />
-        <div class="game-info">
-          <h2>ゲームタイトルB</h2>
-          <p>
-            短編ゲームやプロトタイプはこちら。操作方法やプレイ時間の目安を書いても親切です。
-          </p>
-          <div class="links">
-            <a href="#">itch.io</a>
-            <a href="#">GitHub</a>
-          </div>
-        </div>
-      </section>
-
-    </main>
+    <div class="empty" id="emptyMsg" style="display:none;">該当するゲームがありません。</div>
+    <main class="games" id="games"></main>
 
     <footer>
-      <p><a href="../index.html">トップへ戻る</a></p>
-      <p>© 作者名</p>
+      <p><a href="../index.html" style="text-decoration: underline;">トップへ戻る</a></p>
+      <p>© 2025 Organ All rights reserved</p>
     </footer>
 
   </div>
+
+  <!-- データ -->
+  <script src="../data/worlds.js"></script>
+  <script src="../data/game.js"></script>
+
+  <script>
+    const gamesEl = document.getElementById('games');
+    const emptyEl = document.getElementById('emptyMsg');
+    const chips = document.querySelectorAll('.chip');
+
+    const gamesAll = (window.GAMES || []).slice();
+    const worlds = (window.WORLDS || []).slice();
+    const worldMap = new Map(worlds.map(w => [w.id, w]));
+
+    let selectedWorld = 'all';
+
+    // チップ表示を worlds.js から自動生成したい場合は、次の会話でやれます（今は固定でもOK）
+
+    function render() {
+      const list = (selectedWorld === 'all')
+        ? gamesAll
+        : gamesAll.filter(g => g.worldId === selectedWorld);
+
+      gamesEl.innerHTML = '';
+      emptyEl.style.display = (list.length === 0) ? 'block' : 'none';
+
+      list.forEach(item => {
+        const card = document.createElement('section');
+        card.className = 'game-card';
+
+        const img = document.createElement('img');
+        img.src = `../${item.cover}`;
+        img.alt = item.title || 'game';
+        img.loading = 'lazy';
+
+        const info = document.createElement('div');
+        info.className = 'game-info';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = item.title || '';
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+
+        if (item.worldId && worldMap.has(item.worldId)) {
+          const w = worldMap.get(item.worldId);
+          const aWorld = document.createElement('a');
+          aWorld.className = 'badge';
+          aWorld.href = `../worlds/world.html?id=${encodeURIComponent(w.id)}`;
+          aWorld.textContent = `🌍 ${w.name}`;
+          meta.appendChild(aWorld);
+        }
+
+        const p = document.createElement('p');
+        p.textContent = item.description || '';
+
+        const links = document.createElement('div');
+        links.className = 'links';
+
+        (item.links || []).forEach(l => {
+          const a = document.createElement('a');
+          a.href = l.url;
+          a.textContent = l.label || 'Link';
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          links.appendChild(a);
+        });
+
+        info.appendChild(h2);
+        info.appendChild(meta);
+        info.appendChild(p);
+        info.appendChild(links);
+
+        card.appendChild(img);
+        card.appendChild(info);
+
+        gamesEl.appendChild(card);
+      });
+    }
+
+    chips.forEach(c => c.addEventListener('click', () => {
+      chips.forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+      selectedWorld = c.dataset.world;
+      render();
+    }));
+
+    render();
+  </script>
 </body>
 </html>
