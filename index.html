@@ -139,6 +139,74 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* ===== Latest Updates ===== */
+    .latest-updates {
+      margin-bottom: 80px;
+    }
+
+    .latest-updates h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      letter-spacing: 0.04em;
+    }
+
+    .updates-scroll {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scroll-snap-type: x mandatory;
+    }
+
+    .updates-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .updates-scroll::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 3px;
+    }
+
+    .update-card {
+      min-width: 200px;
+      max-width: 200px;
+      border: 1px solid #e5e5e5;
+      background: #fff;
+      scroll-snap-align: start;
+      flex-shrink: 0;
+    }
+
+    .update-card img {
+      width: 100%;
+      display: block;
+    }
+
+    .update-card .info {
+      padding: 10px;
+      font-size: 0.85rem;
+    }
+
+    .update-card .type {
+      font-size: 0.7rem;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .update-card .title {
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .updates-more {
+      margin-top: 10px;
+      text-align: right;
+      font-size: 0.9rem;
+    }
+
+    .updates-more a {
+      text-decoration: underline;
+    }
   </style>
 </head>
 
@@ -158,6 +226,16 @@
       <div class="latest-illust-grid" id="latestIllustGrid"></div>
       <div class="latest-illust-more">
         <a href="illust/index.html">more →</a>
+      </div>
+    </section>
+
+    <section class="latest-updates">
+      <h2>Latest Updates</h2>
+
+      <div class="updates-scroll" id="updatesScroll"></div>
+
+      <div class="updates-more">
+        <a href="updates/index.html">more →</a>
       </div>
     </section>
 
@@ -230,6 +308,55 @@
       });
     })();
   </script>
+  
+  <script>
+    (function renderUpdates(){
+      const container = document.getElementById('updatesScroll');
+      if (!container) return;
+  
+      const updates = (window.UPDATES || []).slice();
+      if (updates.length === 0) return;
+  
+      // 日付でソート（新しい順）
+      updates.sort((a,b) =>
+        String(b.date || '').localeCompare(String(a.date || ''))
+      );
+  
+      // 最大10件
+      updates.slice(0, 10).forEach(item => {
+        const a = document.createElement('a');
+        a.href = item.link;
+        a.className = 'update-card';
+  
+        const img = document.createElement('img');
+        img.src = item.image;
+        img.alt = item.title;
+        img.loading = 'lazy';
+  
+        const info = document.createElement('div');
+        info.className = 'info';
+  
+        const type = document.createElement('div');
+        type.className = 'type';
+        type.textContent =
+          item.type === 'illust' ? '🖼 Illustration'
+          : item.type === 'comic' ? '📖 Comic'
+          : '🎮 Game';
+  
+        const title = document.createElement('div');
+        title.className = 'title';
+        title.textContent = item.title;
+  
+        info.appendChild(type);
+        info.appendChild(title);
+  
+        a.appendChild(img);
+        a.appendChild(info);
+        container.appendChild(a);
+      });
+    })();
+  </script>
+  
 </body>
 
 </html>
