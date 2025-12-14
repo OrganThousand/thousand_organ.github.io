@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Illustrations</title>
+
   <style>
     body {
       margin: 0;
@@ -11,18 +12,18 @@
       background: #fafafa;
       color: #222;
     }
-    header {
-      padding: 20px 16px 8px;
+    header { padding: 20px 16px 8px; }
+    header h1 { font-size: 1.4rem; margin: 0 0 8px; }
+    header p { font-size: 0.9rem; color: #666; margin: 0; }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px 16px 0;
+      align-items: center;
     }
-    header h1 {
-      font-size: 1.4rem;
-      margin: 0 0 8px;
-    }
-    header p {
-      font-size: 0.9rem;
-      color: #666;
-      margin: 0;
-    }
+
     .tag-filter {
       display: flex;
       flex-wrap: wrap;
@@ -37,10 +38,25 @@
       cursor: pointer;
       user-select: none;
     }
-    .tag.active {
-      background: #222;
-      color: #fff;
+    .tag.active { background: #222; color: #fff; }
+
+    .sort {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px 8px;
+      color: #666;
+      font-size: 0.85rem;
     }
+    select {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #fff;
+      font-size: 0.9rem;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -53,79 +69,208 @@
       overflow: hidden;
       box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     }
+    .item a { display: block; }
     .item img {
       width: 100%;
       display: block;
+      cursor: zoom-in;
+      transition: opacity 120ms ease;
     }
+    .item a:hover img { opacity: 0.92; }
+
     .item .caption {
       padding: 6px 8px;
       font-size: 0.75rem;
       color: #555;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: baseline;
     }
-    .item a:hover img {
- 　　 opacity: 0.9;
-　　}
+    .item .year { color: #999; font-size: 0.72rem; white-space: nowrap; }
+
+    .empty {
+      padding: 24px 16px 0;
+      color: #777;
+      font-size: 0.95rem;
+    }
+
+    footer {
+      padding: 24px 16px 40px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    footer a { color: inherit; text-decoration: underline; }
   </style>
 </head>
+
 <body>
+  <header>
+    <h1>Illustrations</h1>
+    <p>創作イラスト一覧。タグで絞り込みできます。</p>
+  </header>
 
-<header>
-  <h1>Illustrations</h1>
-  <p>創作イラスト一覧。タグで絞り込みできます。</p>
-</header>
-
-<div class="tag-filter">
-  <div class="tag active" data-tag="all">すべて</div>
-  <div class="tag" data-tag="fantasy">ファンタジー</div>
-  <div class="tag" data-tag="myth">神話</div>
-  <div class="tag" data-tag="original">オリジナル</div>
-</div>
-
-<main class="grid">
-  <div class="item" data-tags="fantasy myth original">
-   <a href="test_illust_A.html">
-    <img src="images/2loras_test__00037_.png" alt="神話世界の旅人">
-  　　</a>
-    <div class="caption">神話世界の旅人</div>
+  <div class="controls">
+    <div class="sort">
+      <label for="sortSelect">並び替え</label>
+      <select id="sortSelect">
+        <option value="new">新しい順</option>
+        <option value="old">古い順</option>
+        <option value="title">タイトル順</option>
+      </select>
+    </div>
   </div>
 
-  <div class="item" data-tags="fantasy original">
-    <img src="images/illust_02.jpg" alt="illustration">
-    <div class="caption">森と機械</div>
-  </div>
+  <div class="tag-filter" id="tagFilter"></div>
 
-  <div class="item" data-tags="myth original">
-    <img src="images/illust_03.jpg" alt="illustration">
-    <div class="caption">風の神</div>
-  </div>
-</main>
-
-<script>
-  const tags = document.querySelectorAll('.tag');
-  const items = document.querySelectorAll('.item');
-
-  tags.forEach(tag => {
-    tag.addEventListener('click', () => {
-      tags.forEach(t => t.classList.remove('active'));
-      tag.classList.add('active');
-
-      const selected = tag.dataset.tag;
-
-      items.forEach(item => {
-        if (selected === 'all' || item.dataset.tags.includes(selected)) {
-          item.style.display = 'block';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  });
-</script>
+  <div class="empty" id="emptyMsg" style="display:none;">該当するイラストがありません。</div>
+  <main class="grid" id="grid"></main>
 
   <footer>
-      <p><a href="../index.html">トップへ戻る</a></p>
-      <p>© 2025 Organ All rights reserved</p>
+    <p><a href="../index.html">トップへ戻る</a></p>
+    <p>© 2025 Organ All rights reserved</p>
   </footer>
 
+  <!-- データ読み込み -->
+  <script src="data.js"></script>
+
+  <script>
+    const illusts = (window.ILLUSTS || []).slice(); // コピー
+    const tagLabels = window.TAG_LABELS || {};
+
+    const tagFilterEl = document.getElementById('tagFilter');
+    const gridEl = document.getElementById('grid');
+    const emptyMsgEl = document.getElementById('emptyMsg');
+    const sortSelect = document.getElementById('sortSelect');
+
+    // URLパラメータ（?tag=xxx）
+    const params = new URLSearchParams(location.search);
+    let selectedTag = params.get('tag') || 'all';
+
+    // タグ一覧を収集（data.jsから自動生成）
+    function collectTags() {
+      const set = new Set();
+      illusts.forEach(i => (i.tags || []).forEach(t => set.add(t)));
+      return Array.from(set);
+    }
+
+    // 表示用のタグ名
+    function tagLabel(tag) {
+      if (tag === 'all') return (tagLabels.all || 'すべて');
+      return tagLabels[tag] || tag;
+    }
+
+    // ソート用のキー（日付がなければ配列順を尊重）
+    function dateKey(item) {
+      // dateがあればそれを使う（YYYY-MM-DD想定）
+      if (item.date) return item.date;
+      // dateがない場合は year だけでも一応
+      if (item.year) return item.year + '-01-01';
+      return '0000-01-01';
+    }
+
+    function buildTagButtons() {
+      tagFilterEl.innerHTML = '';
+
+      const tags = collectTags();
+      const allTags = ['all', ...tags];
+
+      allTags.forEach(tag => {
+        const el = document.createElement('div');
+        el.className = 'tag' + (tag === selectedTag ? ' active' : '');
+        el.dataset.tag = tag;
+        el.textContent = tagLabel(tag);
+
+        el.addEventListener('click', () => {
+          selectedTag = tag;
+
+          // URLも更新（戻る/共有に強い）
+          const p = new URLSearchParams(location.search);
+          if (selectedTag === 'all') p.delete('tag');
+          else p.set('tag', selectedTag);
+
+          history.replaceState(null, '', `${location.pathname}?${p.toString()}`);
+
+          // ボタン状態更新
+          document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+          el.classList.add('active');
+
+          render();
+        });
+
+        tagFilterEl.appendChild(el);
+      });
+    }
+
+    function sortItems(list) {
+      const mode = sortSelect.value;
+
+      if (mode === 'title') {
+        return list.sort((a, b) => (a.title || '').localeCompare((b.title || ''), 'ja'));
+      }
+
+      // new / old
+      return list.sort((a, b) => {
+        const da = dateKey(a);
+        const db = dateKey(b);
+        if (mode === 'new') return db.localeCompare(da);
+        return da.localeCompare(db);
+      });
+    }
+
+    function render() {
+      let list = illusts;
+
+      if (selectedTag !== 'all') {
+        list = list.filter(item => (item.tags || []).includes(selectedTag));
+      }
+
+      list = sortItems(list.slice());
+
+      gridEl.innerHTML = '';
+      emptyMsgEl.style.display = (list.length === 0) ? 'block' : 'none';
+
+      list.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'item';
+
+        const a = document.createElement('a');
+        a.href = `view.html?id=${encodeURIComponent(item.id)}`;
+
+        const img = document.createElement('img');
+        img.src = item.image;
+        img.alt = item.title || 'illustration';
+        img.loading = 'lazy';
+
+        a.appendChild(img);
+
+        const cap = document.createElement('div');
+        cap.className = 'caption';
+
+        const title = document.createElement('div');
+        title.textContent = item.title || '';
+
+        const year = document.createElement('div');
+        year.className = 'year';
+        year.textContent = item.year || '';
+
+        cap.appendChild(title);
+        cap.appendChild(year);
+
+        card.appendChild(a);
+        card.appendChild(cap);
+        gridEl.appendChild(card);
+      });
+    }
+
+    // 初期ソート選択（新しい順）
+    sortSelect.value = 'new';
+    sortSelect.addEventListener('change', render);
+
+    // 初期化
+    buildTagButtons();
+    render();
+  </script>
 </body>
 </html>

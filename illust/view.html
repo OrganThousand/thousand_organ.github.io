@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Illustration</title>
+
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif; background: #fafafa; color: #222; }
+    .container { max-width: 720px; margin: 0 auto; padding: 16px; }
+    .hero-img { width: 100%; border-radius: 8px; cursor: zoom-in; }
+    h1 { font-size: 1.2rem; margin: 16px 0 8px; }
+    .meta { font-size: 0.85rem; color: #666; margin-bottom: 10px; }
+    .caption { font-size: 0.95rem; color: #444; line-height: 1.8; }
+
+    .tags { margin-top: 12px; }
+    .tags a {
+      display: inline-block; margin: 4px 6px 0 0; padding: 4px 10px;
+      font-size: 0.75rem; background: #eee; border-radius: 999px;
+      text-decoration: none; color: #333;
+    }
+
+    .links { margin-top: 24px; padding-top: 16px; border-top: 1px solid #ddd; }
+    .links a { display: block; margin-bottom: 8px; text-decoration: none; color: #0066cc; font-size: 0.95rem; }
+
+    .nav { display:flex; justify-content: space-between; gap: 12px; margin-top: 22px; }
+    .nav a {
+      flex: 1; text-align:center; border: 1px solid #ddd; border-radius: 6px;
+      padding: 10px 12px; text-decoration:none; color:#333; background:#fff;
+    }
+    .nav a[aria-disabled="true"] { opacity: 0.4; pointer-events: none; }
+
+    footer { margin: 40px 0 16px; text-align:center; font-size: 0.8rem; color:#666; }
+    footer a { color: inherit; text-decoration: underline; }
+
+    /* フルスクリーン（フェード＋スクロール固定はJS） */
+    .fullscreen-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; cursor: zoom-out;
+
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+    .fullscreen-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .fullscreen-overlay img {
+      max-width: 95%;
+      max-height: 95%;
+      transform: scale(0.98);
+      transition: transform 180ms ease;
+    }
+    .fullscreen-overlay.is-open img { transform: scale(1); }
+
+    .close-button {
+      position: absolute; top: 16px; right: 16px;
+      width: 40px; height: 40px; border: none; border-radius: 50%;
+      background: rgba(0,0,0,0.6); color: #fff;
+      font-size: 24px; line-height: 40px; text-align: center;
+      cursor: pointer; z-index: 10000;
+    }
+    .close-button:hover { background: rgba(0,0,0,0.8); }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <img id="mainImg" class="hero-img" src="" alt="" />
+    <h1 id="title"></h1>
+    <div class="meta" id="meta"></div>
+    <div class="caption" id="caption"></div>
+
+    <div class="tags" id="tags"></div>
+
+    <div class="links" id="crossLinks"></div>
+
+    <div class="nav">
+      <a id="prevBtn" href="#" aria-disabled="true">← 前</a>
+      <a href="index.html">一覧へ戻る</a>
+      <a id="nextBtn" href="#" aria-disabled="true">次 →</a>
+    </div>
+
+    <footer>
+      <p><a href="../index.html">トップへ戻る</a></p>
+      <p>© 2025 Organ All rights reserved</p>
+    </footer>
+  </div>
+
+  <!-- フルスクリーン -->
+  <div class="fullscreen-overlay" id="fullscreen">
+    <button class="close-button" aria-label="閉じる">×</button>
+    <img id="fullscreenImg" src="" alt="">
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    const illusts = window.ILLUSTS || [];
+    const tagLabels = window.TAG_LABELS || {};
+
+    const params = new URLSearchParams(location.search);
+    let currentId = params.get("id") || (illusts[0] && illusts[0].id);
+
+    const titleEl = document.getElementById("title");
+    const metaEl = document.getElementById("meta");
+    const captionEl = document.getElementById("caption");
+    const tagsEl = document.getElementById("tags");
+    const crossLinksEl = document.getElementById("crossLinks");
+    const mainImg = document.getElementById("mainImg");
+
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    // フルスクリーン
+    const overlay = document.getElementById("fullscreen");
+    const overlayImg = document.getElementById("fullscreenImg");
+    const closeBtn = overlay.querySelector(".close-button");
+
+    function setNavState(index) {
+      const prev = illusts[index - 1];
+      const next = illusts[index + 1];
+
+      if (prev) {
+        prevBtn.href = `view.html?id=${prev.id}`;
+        prevBtn.setAttribute("aria-disabled", "false");
+      } else {
+        prevBtn.href = "#";
+        prevBtn.setAttribute("aria-disabled", "true");
+      }
+
+      if (next) {
+        nextBtn.href = `view.html?id=${next.id}`;
+        nextBtn.setAttribute("aria-disabled", "false");
+      } else {
+        nextBtn.href = "#";
+        nextBtn.setAttribute("aria-disabled", "true");
+      }
+    }
+
+    function render(id) {
+      const item = illusts.find(x => x.id === id) || illusts[0];
+      if (!item) return;
+
+      currentId = item.id;
+
+      document.title = `${item.title} | Illustrations`;
+      mainImg.src = item.image;
+      mainImg.alt = item.title;
+
+      titleEl.textContent = item.title;
+      metaEl.textContent = `${item.year || ""}${item.worldLabel ? " / " + item.worldLabel : ""}`;
+      captionEl.textContent = item.caption || "";
+
+      // タグ（一覧に戻る時にタグで絞れるようにしておく）
+      tagsEl.innerHTML = "";
+      (item.tags || []).forEach(tag => {
+        const a = document.createElement("a");
+        a.href = `index.html?tag=${encodeURIComponent(tag)}`;
+        a.textContent = `#${tagLabels[tag] || tag}`;
+        tagsEl.appendChild(a);
+      });
+
+      // 横断リンク
+      const manga = item.links && item.links.manga ? item.links.manga : null;
+      const game  = item.links && item.links.game  ? item.links.game  : null;
+
+      crossLinksEl.innerHTML = "";
+      if (manga) {
+        const a = document.createElement("a");
+        a.href = manga;
+        a.textContent = "📘 この世界観の漫画を読む";
+        crossLinksEl.appendChild(a);
+      }
+      if (game) {
+        const a = document.createElement("a");
+        a.href = game;
+        a.textContent = "🎮 この世界観のゲームを遊ぶ";
+        crossLinksEl.appendChild(a);
+      }
+
+      const index = illusts.findIndex(x => x.id === item.id);
+      setNavState(index);
+    }
+
+    function openFullscreen() {
+      overlayImg.src = mainImg.src;
+      overlay.classList.add("is-open");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeFullscreen() {
+      overlay.classList.remove("is-open");
+      document.body.style.overflow = "";
+      setTimeout(() => {
+        if (!overlay.classList.contains("is-open")) overlayImg.src = "";
+      }, 200);
+    }
+
+    // 画像クリックでフルスクリーン
+    mainImg.addEventListener("click", openFullscreen);
+    overlay.addEventListener("click", closeFullscreen);
+    closeBtn.addEventListener("click", closeFullscreen);
+
+    // ESC・左右キー（フルスクリーン中だけ）
+    document.addEventListener("keydown", (e) => {
+      if (!overlay.classList.contains("is-open")) return;
+
+      if (e.key === "Escape") closeFullscreen();
+
+      const idx = illusts.findIndex(x => x.id === currentId);
+      if (e.key === "ArrowRight" && illusts[idx + 1]) {
+        location.href = `view.html?id=${illusts[idx + 1].id}`;
+      }
+      if (e.key === "ArrowLeft" && illusts[idx - 1]) {
+        location.href = `view.html?id=${illusts[idx - 1].id}`;
+      }
+    });
+
+    render(currentId);
+  </script>
+</body>
+</html>
