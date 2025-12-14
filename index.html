@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -87,6 +88,57 @@
         background-color: #ffffff;
       }
     }
+
+    /* ===== Latest Illustrations ===== */
+    .latest-illust {
+      margin-bottom: 60px;
+    }
+
+    .latest-illust h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      letter-spacing: 0.04em;
+      text-align: center;
+    }
+
+    .latest-illust-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .latest-illust-grid a {
+      display: block;
+      border: 1px solid #e5e5e5;
+      background: #fff;
+      overflow: hidden;
+      transition: opacity 0.2s ease;
+    }
+
+    .latest-illust-grid a:hover {
+      opacity: 0.9;
+    }
+
+    .latest-illust-grid img {
+      width: 100%;
+      display: block;
+    }
+
+    .latest-illust-more {
+      margin-top: 12px;
+      text-align: right;
+      font-size: 0.9rem;
+    }
+
+    .latest-illust-more a {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .latest-illust-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 
@@ -100,6 +152,14 @@
         作品の世界観と物語を、静かに楽しんでもらえる場所を目指しています。
       </p>
     </header>
+
+    <section class="latest-illust">
+      <h2>Latest Illustrations</h2>
+      <div class="latest-illust-grid" id="latestIllustGrid"></div>
+      <div class="latest-illust-more">
+        <a href="illust/index.html">more →</a>
+      </div>
+    </section>
 
     <main class="contents">
       <a class="content-card" href="comic/index.html">
@@ -132,5 +192,44 @@
     </footer>
 
   </div>
+
+  <script src="illust/data.js"></script>
+
+  <script>
+    (function renderLatestIllusts() {
+      const grid = document.getElementById('latestIllustGrid');
+      if (!grid) return;
+
+      const illusts = (window.ILLUSTS || []).slice();
+      if (illusts.length === 0) return;
+
+      // 新着判定：date があれば date、なければ配列末尾が新しい想定
+      const hasDate = illusts.some(i => i.date);
+      if (hasDate) {
+        illusts.sort((a, b) =>
+          String(b.date || '').localeCompare(String(a.date || ''))
+        );
+      } else {
+        illusts.reverse();
+      }
+
+      const latest = illusts.slice(0, 3);
+
+      grid.innerHTML = '';
+      latest.forEach(item => {
+        const a = document.createElement('a');
+        a.href = `illust/view.html?id=${encodeURIComponent(item.id)}`;
+
+        const img = document.createElement('img');
+        img.src = `illust/${item.image}`;
+        img.alt = item.title || 'illustration';
+        img.loading = 'lazy';
+
+        a.appendChild(img);
+        grid.appendChild(a);
+      });
+    })();
+  </script>
 </body>
+
 </html>
