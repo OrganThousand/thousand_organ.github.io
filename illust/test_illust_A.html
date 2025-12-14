@@ -58,16 +58,31 @@
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.85);
-      display: none;
+      display: flex;/* 常にflex（フェードのため） */
       align-items: center;
       justify-content: center;
       z-index: 9999;
       cursor: zoom-out;
+
+      opacity: 0; /* 初期は透明 */
+      pointer-events: none; /* 透明のときはクリック不可 */
+      transition: opacity 180ms ease;/* フェード速度 */
+    }
+
+    .fullscreen-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .fullscreen-overlay img {
       max-width: 95%;
       max-height: 95%;
+      transform: scale(0.98);                 /* ほんの少しだけ */
+      transition: transform 180ms ease;       /* 画像も気持ちよく */
+    }
+
+    .fullscreen-overlay.is-open img {
+       transform: scale(1);
     }
 
     /* 画像ホバー時 */
@@ -97,28 +112,34 @@
   </div>
 
   <script>
-    // フルスクリーン表示（個別ページ用）
     const overlay = document.getElementById('fullscreen');
     const overlayImg = overlay.querySelector('img');
     const mainImg = document.querySelector('.container > img');
-
-    mainImg.addEventListener('click', () => {
+  
+    function openFullscreen() {
       overlayImg.src = mainImg.src;
-      overlay.style.display = 'flex';
+      overlay.classList.add('is-open');
       document.body.style.overflow = 'hidden'; // スクロール固定
-    });
-
-    overlay.addEventListener('click', () => {
-      overlay.style.display = 'none';
-      overlayImg.src = '';
+    }
+  
+    function closeFullscreen() {
+      overlay.classList.remove('is-open');
       document.body.style.overflow = ''; // スクロール解除
-    });
-    // ESCキーで閉じる
+  
+      // フェードアウト中に画像を消す（ちらつき防止）
+      setTimeout(() => {
+        if (!overlay.classList.contains('is-open')) {
+          overlayImg.src = '';
+        }
+      }, 200);
+    }
+  
+    mainImg.addEventListener('click', openFullscreen);
+    overlay.addEventListener('click', closeFullscreen);
+  
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && overlay.style.display === 'flex') {
-        overlay.style.display = 'none';
-        overlayImg.src = '';
-        document.body.style.overflow = ''; // スクロール解除
+      if (e.key === 'Escape' && overlay.classList.contains('is-open')) {
+        closeFullscreen();
       }
     });
   </script>
