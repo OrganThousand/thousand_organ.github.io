@@ -13,10 +13,7 @@
       color: #111;
     }
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
+    a { color: inherit; text-decoration: none; }
 
     .container {
       max-width: 1100px;
@@ -24,18 +21,42 @@
       padding: 32px 20px 64px;
     }
 
-    header {
-      margin-bottom: 40px;
-    }
+    header { margin-bottom: 28px; }
+    header h1 { font-size: 1.6rem; margin-bottom: 8px; }
+    header p { font-size: 0.9rem; color: #555; }
 
-    header h1 {
-      font-size: 1.6rem;
-      margin-bottom: 8px;
+    /* controls */
+    .controls {
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin: 12px 0 22px;
     }
+    .chips { display:flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #eee;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.85rem;
+    }
+    .chip.active { background:#111; color:#fff; }
 
-    header p {
-      font-size: 0.9rem;
-      color: #555;
+    .search {
+      margin-left: auto;
+      display:flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .search input {
+      width: min(340px, 70vw);
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      background: #fff;
     }
 
     .works {
@@ -50,11 +71,9 @@
       flex-direction: column;
       height: 100%;
       transition: background-color 0.2s ease;
+      background: #fff;
     }
-
-    .work-card:hover {
-      background-color: #fafafa;
-    }
+    .work-card:hover { background-color: #fafafa; }
 
     .work-card img {
       width: 100%;
@@ -70,12 +89,7 @@
       flex-direction: column;
       gap: 8px;
     }
-
-    .work-info h2 {
-      font-size: 1.1rem;
-      margin: 0;
-    }
-
+    .work-info h2 { font-size: 1.1rem; margin: 0; }
     .work-info p {
       font-size: 0.85rem;
       color: #555;
@@ -87,7 +101,19 @@
       margin-top: auto;
       font-size: 0.75rem;
       color: #777;
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
     }
+    .badge {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #eee;
+      color: #444;
+      font-size: 0.75rem;
+    }
+
+    .empty { padding: 22px 0; color:#666; }
 
     footer {
       margin-top: 80px;
@@ -97,13 +123,8 @@
     }
 
     @media (min-width: 900px) {
-      body {
-        background-color: #f5f5f5;
-      }
-
-      .container {
-        background-color: #ffffff;
-      }
+      body { background-color: #f5f5f5; }
+      .container { background-color: #ffffff; }
     }
   </style>
 </head>
@@ -116,39 +137,157 @@
       <p>連載・読切作品の一覧です。作品ごとに、話数順で読むことができます。</p>
     </header>
 
-    <main class="works">
+    <div class="controls">
+      <div class="chips" id="chips">
+        <div class="chip active" data-kind="all">すべて</div>
+        <div class="chip" data-kind="series">連載</div>
+        <div class="chip" data-kind="oneshot">読切</div>
+      </div>
 
-      <!-- 作品カードここから -->
-      <a class="work-card" href="work-a/index.html">
-        <img src="covers/2loras_test__00038_.png" alt="作品A 表紙" />
-        <div class="work-info">
-          <h2>作品タイトルA</h2>
-          <p>
-            ここにあらすじを2〜3行で書きます。世界観やフックが分かる程度で十分です。
-          </p>
-          <div class="work-meta">連載中 / 全12話</div>
-        </div>
-      </a>
-      <!-- 作品カードここまで -->
+      <div class="search">
+        <input id="q" type="search" placeholder="タイトル検索（例：神話 / 森 / 第1話）" />
+      </div>
+    </div>
 
-      <a class="work-card" href="work-b/index.html">
-        <img src="covers/work-b.jpg" alt="作品B 表紙" />
-        <div class="work-info">
-          <h2>作品タイトルB</h2>
-          <p>
-            読切作品や短期連載はこちら。ジャンルや雰囲気が伝わる説明を書くと親切です。
-          </p>
-          <div class="work-meta">完結 / 読切</div>
-        </div>
-      </a>
+    <div class="empty" id="emptyMsg" style="display:none;">該当する作品がありません。</div>
 
-    </main>
+    <main class="works" id="works"></main>
 
     <footer>
-      <p><a href="../index.html">トップへ戻る</a></p>
-      <p>© 作者名</p>
+      <p><a href="../index.html" style="text-decoration: underline;">トップへ戻る</a></p>
+      <p>© 2025 Organ All rights reserved</p>
     </footer>
 
   </div>
+
+  <!-- データ -->
+  <script src="../data/comic.js"></script>
+
+  <script>
+    const worksEl = document.getElementById('works');
+    const emptyEl = document.getElementById('emptyMsg');
+    const chips = document.querySelectorAll('.chip');
+    const qInput = document.getElementById('q');
+
+    const comicsAll = (window.COMICS || []).slice();
+
+    // URL対応: ?kind=series&q=xxx
+    const params = new URLSearchParams(location.search);
+    let selectedKind = params.get('kind') || 'all';
+    let query = params.get('q') || '';
+    qInput.value = query;
+
+    function updateURL() {
+      const p = new URLSearchParams();
+      if (selectedKind !== 'all') p.set('kind', selectedKind);
+      if (query.trim()) p.set('q', query.trim());
+      const qs = p.toString();
+      history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+    }
+
+    function setChipActive() {
+      chips.forEach(c => c.classList.toggle('active', c.dataset.kind === selectedKind));
+    }
+
+    function metaText(item) {
+      const parts = [];
+      if (item.status) parts.push(item.status);
+      if (item.kind === 'series' && typeof item.episodes === 'number') parts.push(`全${item.episodes}話`);
+      if (item.kind === 'oneshot') parts.push('読切');
+      return parts.join(' / ');
+    }
+
+    function filterList() {
+      let list = comicsAll.slice();
+
+      if (selectedKind !== 'all') {
+        list = list.filter(c => c.kind === selectedKind);
+      }
+
+      const q = query.trim().toLowerCase();
+      if (q) {
+        list = list.filter(c =>
+          String(c.title || '').toLowerCase().includes(q) ||
+          String(c.description || '').toLowerCase().includes(q)
+        );
+      }
+
+      return list;
+    }
+
+    function render() {
+      const list = filterList();
+      setChipActive();
+
+      worksEl.innerHTML = '';
+      emptyEl.style.display = (list.length === 0) ? 'block' : 'none';
+
+      list.forEach(item => {
+        const a = document.createElement('a');
+        a.className = 'work-card';
+        // comic/index.html からは work-a/index.html の相対でOKにしたいので、dataはサイト直下 link を持ってる想定
+        // ここでは ../ を付けて解決
+        a.href = `../${item.link}`;
+
+        const img = document.createElement('img');
+        img.src = `../${item.cover}`;
+        img.alt = item.title || 'comic';
+        img.loading = 'lazy';
+
+        const info = document.createElement('div');
+        info.className = 'work-info';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = item.title || '';
+
+        const p = document.createElement('p');
+        p.textContent = item.description || '';
+
+        const meta = document.createElement('div');
+        meta.className = 'work-meta';
+
+        const metaStr = metaText(item);
+        if (metaStr) {
+          const span = document.createElement('span');
+          span.textContent = metaStr;
+          meta.appendChild(span);
+        }
+
+        if (item.worldId) {
+          const b = document.createElement('span');
+          b.className = 'badge';
+          b.textContent = `🌍 ${item.worldId}`;
+          meta.appendChild(b);
+        }
+
+        info.appendChild(h2);
+        info.appendChild(p);
+        info.appendChild(meta);
+
+        a.appendChild(img);
+        a.appendChild(info);
+
+        worksEl.appendChild(a);
+      });
+
+      updateURL();
+    }
+
+    chips.forEach(c => c.addEventListener('click', () => {
+      selectedKind = c.dataset.kind;
+      render();
+    }));
+
+    qInput.addEventListener('input', () => {
+      query = qInput.value;
+      render();
+    });
+
+    // 初期 kind が変なら all に戻す
+    const validKinds = new Set(['all','series','oneshot']);
+    if (!validKinds.has(selectedKind)) selectedKind = 'all';
+
+    render();
+  </script>
 </body>
 </html>
