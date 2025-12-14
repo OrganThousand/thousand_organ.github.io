@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Illustration Title</title>
+  /* CSS */
   <style>
     body {
       margin: 0;
@@ -119,8 +120,9 @@
     }
   </style>
 </head>
+/* html本体 */
 
-<body>
+<body data-illust-id="illust_001"> // イラストページごとに差し替える。ID代わり
   <div class="container">
     <img src="images/2loras_test__00037_.png" alt="illustration" />
     <h1>神話世界の旅人</h1>
@@ -139,8 +141,21 @@
     <button class="close-button" aria-label="閉じる">×</button> // 閉じるボタン
     <img src="" alt="">
   </div>
-
+  /* JavaScript */
   <script>
+
+    // ===== イラスト順 =====
+    const illustOrder = [
+      'illust_001',
+      'illust_002',
+      'illust_003'
+    ];
+
+    const body = document.body;
+    const currentId = body.dataset.illustId;
+    let currentIndex = illustOrder.indexOf(currentId);
+
+    // フルスクリーン関連
     const overlay = document.getElementById('fullscreen');
     const overlayImg = overlay.querySelector('img');
     const mainImg = document.querySelector('.container > img');
@@ -164,13 +179,29 @@
       }, 200);
     }
 
+    function goToIllust(index) {
+      if (index < 0 || index >= illustOrder.length) return;
+      const nextId = illustOrder[index];
+      window.location.href = `${nextId}.html`;
+    }
+
     mainImg.addEventListener('click', openFullscreen);
     overlay.addEventListener('click', closeFullscreen);
     closeBtn.addEventListener('click', closeFullscreen);
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && overlay.classList.contains('is-open')) {
+      if (!overlay.classList.contains('is-open')) return;
+
+      if (e.key === 'Escape') {
         closeFullscreen();
+      }
+
+      if (e.key === 'ArrowRight') {
+        goToIllust(currentIndex + 1);
+      }
+
+      if (e.key === 'ArrowLeft') {
+        goToIllust(currentIndex - 1);
       }
     });
   </script>
