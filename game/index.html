@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,7 +14,10 @@
       color: #111;
     }
 
-    a { color: inherit; text-decoration: none; }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
     .container {
       max-width: 960px;
@@ -21,28 +25,48 @@
       padding: 32px 20px 64px;
     }
 
-    header { margin-bottom: 28px; }
-    header h1 { font-size: 1.6rem; margin-bottom: 8px; }
-    header p { font-size: 0.9rem; color: #555; }
+    header {
+      margin-bottom: 28px;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: #555;
+    }
 
     /* controls */
     .controls {
-      display:flex;
+      display: flex;
       flex-wrap: wrap;
       gap: 10px;
       align-items: center;
       margin: 12px 0 22px;
     }
-    .chips { display:flex; flex-wrap: wrap; gap: 8px; }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
     .chip {
       padding: 6px 12px;
       border-radius: 999px;
-      background:#eee;
-      cursor:pointer;
-      user-select:none;
+      background: #eee;
+      cursor: pointer;
+      user-select: none;
       font-size: 0.85rem;
     }
-    .chip.active { background:#111; color:#fff; }
+
+    .chip.active {
+      background: #111;
+      color: #fff;
+    }
 
     .games {
       display: flex;
@@ -59,7 +83,10 @@
       background: #fff;
       transition: background-color 0.2s ease;
     }
-    .game-card:hover { background-color: #fafafa; }
+
+    .game-card:hover {
+      background-color: #fafafa;
+    }
 
     .game-card img {
       width: 100%;
@@ -68,7 +95,11 @@
       background-color: #ddd;
     }
 
-    .game-info h2 { font-size: 1.2rem; margin: 0 0 8px; }
+    .game-info h2 {
+      font-size: 1.2rem;
+      margin: 0 0 8px;
+    }
+
     .game-info p {
       font-size: 0.9rem;
       color: #555;
@@ -77,25 +108,28 @@
     }
 
     .meta {
-      display:flex;
+      display: flex;
       gap: 10px;
       flex-wrap: wrap;
       align-items: center;
       margin: 8px 0 12px;
-      color:#777;
+      color: #777;
       font-size: 0.85rem;
     }
 
     .badge {
-      display:inline-block;
+      display: inline-block;
       padding: 4px 10px;
       border-radius: 999px;
-      background:#eee;
-      color:#444;
+      background: #eee;
+      color: #444;
       font-size: 0.8rem;
       text-decoration: none;
     }
-    .badge:hover { background:#e6e6e6; }
+
+    .badge:hover {
+      background: #e6e6e6;
+    }
 
     .links {
       display: flex;
@@ -110,7 +144,10 @@
       border-radius: 4px;
     }
 
-    .empty { color:#666; padding: 14px 0; }
+    .empty {
+      color: #666;
+      padding: 14px 0;
+    }
 
     footer {
       margin-top: 80px;
@@ -120,16 +157,36 @@
     }
 
     @media (max-width: 640px) {
-      .game-card { grid-template-columns: 1fr; }
-      .game-card img { max-width: 240px; margin: 0 auto; }
-      .game-info { text-align: center; }
-      .links { justify-content: center; }
-      .meta { justify-content: center; }
+      .game-card {
+        grid-template-columns: 1fr;
+      }
+
+      .game-card img {
+        max-width: 240px;
+        margin: 0 auto;
+      }
+
+      .game-info {
+        text-align: center;
+      }
+
+      .links {
+        justify-content: center;
+      }
+
+      .meta {
+        justify-content: center;
+      }
     }
 
     @media (min-width: 900px) {
-      body { background-color: #f5f5f5; }
-      .container { background-color: #ffffff; }
+      body {
+        background-color: #f5f5f5;
+      }
+
+      .container {
+        background-color: #ffffff;
+      }
     }
   </style>
 </head>
@@ -143,11 +200,7 @@
     </header>
 
     <div class="controls">
-      <div class="chips" id="chips">
-        <div class="chip active" data-world="all">すべて</div>
-        <div class="chip" data-world="mythland">神話世界</div>
-        <div class="chip" data-world="mechforest">森と機械</div>
-      </div>
+      <div class="chips" id="chips"></div>
     </div>
 
     <div class="empty" id="emptyMsg" style="display:none;">該当するゲームがありません。</div>
@@ -173,11 +226,41 @@
     const worlds = (window.WORLDS || []).slice();
     const worldMap = new Map(worlds.map(w => [w.id, w]));
 
+    // ===== 世界観チップを自動生成 =====
+    const chipsEl = document.getElementById('chips');
     let selectedWorld = 'all';
 
-    // チップ表示を worlds.js から自動生成したい場合は、次の会話でやれます（今は固定でもOK）
+    function renderChips() {
+      chipsEl.innerHTML = '';
 
-    function render() {
+      // 「すべて」
+      const allChip = document.createElement('div');
+      allChip.className = 'chip active';
+      allChip.dataset.world = 'all';
+      allChip.textContent = 'すべて';
+      chipsEl.appendChild(allChip);
+
+      // worlds.js から生成
+      worlds.forEach(w => {
+        const c = document.createElement('div');
+        c.className = 'chip';
+        c.dataset.world = w.id;
+        c.textContent = w.name;
+        chipsEl.appendChild(c);
+      });
+
+      // イベント
+      chipsEl.querySelectorAll('.chip').forEach(c => {
+        c.addEventListener('click', () => {
+          chipsEl.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+          c.classList.add('active');
+          selectedWorld = c.dataset.world;
+          renderGames();
+        });
+      });
+    }
+
+    function renderGames() {
       const list = (selectedWorld === 'all')
         ? gamesAll
         : gamesAll.filter(g => g.worldId === selectedWorld);
@@ -246,7 +329,10 @@
       render();
     }));
 
-    render();
+    renderChips();
+    renderGames();
+    
   </script>
 </body>
+
 </html>
